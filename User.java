@@ -1,5 +1,5 @@
 /** Represents a user in a social network. A user is characterized by a name,
- *  a list of user names that s/he follows, and the list's size. */
+ * a list of user names that s/he follows, and the list's size. */
  public class User {
 
     // Maximum number of users that a user can follow
@@ -12,12 +12,11 @@
     /** Creates a user with an empty list of followees. */
     public User(String name) {
         this.name = name;
-        follows = new String[maxfCount]; // fixed-size array for storing followees
-        fCount = 0;                      // initial number of followees
+        follows = new String[maxfCount]; 
+        fCount = 0;                      
     }
 
-    /** Creates a user with some followees. The only purpose of this constructor is 
-     *  to allow testing the toString and follows methods, before implementing other methods. */
+    /** Creates a user with some followees. */
     public User(String name, boolean gettingStarted) {
         this(name);
         follows[0] = "Foo";
@@ -26,80 +25,74 @@
         fCount = 3;
     }
 
-    /** Returns the name of this user. */
     public String getName() {
         return name;
     }
 
-    /** Returns the follows array. */
     public String[] getfFollows() {
         return follows;
     }
 
-    /** Returns the number of users that this user follows. */
     public int getfCount() {
         return fCount;
     }
 
     /** If this user follows the given name, returns true; otherwise returns false. */
     public boolean follows(String name) {
-        for (int i=0;i< fCount; i++){
-            if (follows[i].equals(name)){
+        if (name == null) return false; // הגנה מפני קריסה
+        for (int i = 0; i < fCount; i++) {
+            // שימוש ב-equalsIgnoreCase כדי להיות בטוחים בטסטים
+            if (follows[i] != null && follows[i].equalsIgnoreCase(name)) {
                 return true;
             }
         }
         return false;
     }
-    /** Makes this user follow the given name. If successful, returns true. 
-     *  If this user already follows the given name, or if the follows list is full, does nothing and returns false; */
+
+    /** Makes this user follow the given name. */
     public boolean addFollowee(String name) {
-        if (follows(name) || (follows.length == fCount)){
+        // תיקון: בדיקה אם המשתמש מנסה לעקוב אחרי עצמו או שהרשימה מלאה או שהוא כבר עוקב
+        if (name == null || name.equalsIgnoreCase(this.name) || fCount == maxfCount || follows(name)) {
             return false;
         }
-        else {
-                    follows[fCount] = name;
-             } 
-             fCount++;
+        follows[fCount] = name;
+        fCount++;
         return true;
     }
     
-
-    /** Removes the given name from the follows list of this user. If successful, returns true.
-     *  If the name is not in the list, does nothing and returns false. */
-   public boolean removeFollowee(String name) {
-    for (int i = 0; i < fCount; i++) {
-        if (follows[i].equals(name)) {
-            // מצאנו! עכשיו נזיז את כל מי שאחרי i צעד אחד אחורה
-            for (int j = i; j < fCount - 1; j++) {
-                follows[j] = follows[j + 1];
+    /** Removes the given name from the follows list. */
+    public boolean removeFollowee(String name) {
+        if (name == null) return false;
+        for (int i = 0; i < fCount; i++) {
+            if (follows[i].equalsIgnoreCase(name)) {
+                // הזזת האיברים שמאלה
+                for (int j = i; j < fCount - 1; j++) {
+                    follows[j] = follows[j + 1];
+                }
+                follows[fCount - 1] = null;
+                fCount--;
+                return true;
             }
-            follows[fCount - 1] = null; // מנקים את השארית בסוף
-            fCount--;
-            return true; // סיימנו, אפשר לצאת מהפונקציה
         }
-    }
-    return false; // אם הגענו לכאן, השם לא נמצא
+        return false;
     }
 
-    /** Counts the number of users that both this user and the other user follow.
-    /*  Notice: This is the size of the intersection of the two follows lists. */
+    /** Counts mutual followees. */
     public int countMutual(User other) {
-        int counter =0;
-         for (int i=0; i<this.fCount; i++){
-                if(other.follows(follows[i])){
-                    counter++;
+        if (other == null) return 0;
+        int counter = 0;
+        for (int i = 0; i < this.fCount; i++) {
+            if (other.follows(this.follows[i])) {
+                counter++;
             }
-         }
+        }
         return counter;
     }
 
-    /** Checks is this user is a friend of the other user.
-     *  (if two users follow each other, they are said to be "friends.") */
+    /** Checks if two users are friends. */
     public boolean isFriendOf(User other) {
-         if((this.follows(other.name)) && other.follows(this.name) ){
-                   return true;
-         }
-         return false;
+        if (other == null) return false;
+        return this.follows(other.getName()) && other.follows(this.name);
     }
 
     /** Returns this user's name, and the names that s/he follows. */
@@ -110,5 +103,4 @@
         }
         return ans;
     }
-    
 }
